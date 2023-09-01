@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -70,7 +69,6 @@ public class MaxSegmentTree implements SegmentTree {
 
       queue.add(nextLevel);
     }
-
   }
 
   @Override
@@ -98,27 +96,25 @@ public class MaxSegmentTree implements SegmentTree {
     return max;
   }
 
-  public int updateRange(int left, int right, int value) {
-    return updateRange(root, left, right, value);
+  public void updateRange(int left, int right, int value) {
+    updateRange(root, left, right, value);
   }
 
-  public int updateRange(Node n, int left, int right, int value) {
+  public void updateRange(Node n, int left, int right, int value) {
     if (right < n.lo)
-      return 1;
+      return;
     if (left > n.hi)
-      return 1;
+      return;
 
     if (n.lo >= left && n.hi <= right) {
       n.max = Math.max(n.max, value);
     }
 
     if (n.left != null && left <= n.left.hi)
-      return 1 + updateRange(n.left, left, right, value);
+      updateRange(n.left, left, right, value);
 
     if (n.right != null && right >= n.right.lo)
-      return 1 + updateRange(n.right, left, right, value);
-
-    return 1;
+      updateRange(n.right, left, right, value);
   }
 
   @Override
