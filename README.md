@@ -12,3 +12,5 @@ This is a simple implementation of a max segment tree. It supports the following
 - Add a generic way of applying a function to a range of elements in the array. Things like sum, min, max, etc. can be implemented this way.
 
 - Efficiency can be improved by storing the tree in an array instead of a Node class. This will reduce CPU cache misses by increasing locality of reference.
+
+- Implement Lazy Propagation to improve the efficiency of range updates.
