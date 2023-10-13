@@ -1,6 +1,3 @@
-import java.util.Deque;
-import java.util.LinkedList;
-
 interface SegmentTree {
   /**
    * Query the queryable property between left and right
@@ -22,112 +19,92 @@ interface SegmentTree {
  * An implementation of a Max Segment Tree
  */
 public class MaxSegmentTree implements SegmentTree {
-  private Node root;
+  private Integer[] maxes;
+  private Integer[] segmentStarts;
+  private Integer[] segmentEnds;
 
-  public MaxSegmentTree(int[] n) {
-    /*
-     * - Works by grouping 2 nodes and adding the new node to a new level
-     * - An odd numbered node is simply passed up as is
-     */
+  public MaxSegmentTree(int[] array) {
 
-    /*
-     * For example:
-     * {0, 1, 2, 3, 4}
-     * 
-     * {0:0}, {1:1}, {2:2}, {3:3}, {4:4}
-     * {0:1}, {2:3}, {4}
-     * {0:3}, {4}
-     * {0:4}
-     */
+    // Get the bottom level of the binary tree
+    // Minimize d s.t. 2^d >=len(array)
+    int bottomLevelSize = findNextPowerOfTwo(array.length);
 
-    Deque<Deque<Node>> queue = new LinkedList<>();
+    // The total number of nodes in the perfect binary tree
+    int numNodes = 2 * bottomLevelSize - 1;
 
-    // Initial queue of nodes with a range from [i:i]
-    Deque<Node> start = new LinkedList<Node>();
+    // Initialize tree arrays
+    maxes = new Integer[numNodes];
+    segmentStarts = new Integer[numNodes];
+    segmentEnds = new Integer[numNodes];
 
-    for (int i = 0; i < n.length; i++) {
-      int num = n[i];
-      start.add(new Node(num, i, i));
+    // Copies original array values to the end of the array, implicitly casting to
+    // Integer
+    for (int i = 0; i < array.length; i++) {
+      maxes[bottomLevelSize + i - 1] = array[i];
     }
 
-    queue.add(start);
+    for (int i = bottomLevelSize - 1; i < numNodes; i++) {
+      segmentStarts[i] = i - bottomLevelSize + 1;
+      segmentEnds[i] = i - bottomLevelSize + 1;
+    }
 
-    // While the levels queue is not empty there are still more levels to process
-    while (!queue.isEmpty()) {
-      Deque<Node> level = queue.poll();
-      Deque<Node> nextLevel = new LinkedList<>();
+    for (int i = bottomLevelSize - 2; i >= 0; i--) {
+      int leftIdx = getLeftChildIdx(i);
+      int rightIdx = getRightChildIdx(i);
 
-      if (level.size() == 1) {
-        this.root = level.poll();
-        break;
-      }
+      maxes[i] = safeMax(maxes[leftIdx], maxes[rightIdx]);
 
-      // Group nodes together. Keep track of their max within their range.
-      while (level.size() >= 2) {
-        Node n1 = level.poll();
-        Node n2 = level.poll();
-
-        int max = Math.max(n1.max, n2.max);
-
-        Node newn = new Node(max, n1.lo, n2.hi);
-        newn.left = n1;
-        newn.right = n2;
-
-        nextLevel.add(newn);
-      }
-
-      // if there's an odd numbered node, send to the next level
-      if (!level.isEmpty())
-        nextLevel.add(level.poll());
-
-      queue.add(nextLevel);
+      segmentStarts[i] = segmentStarts[leftIdx];
+      segmentEnds[i] = segmentEnds[rightIdx];
     }
   }
 
-  private int query(Node n, int left, int right) {
-    // Sanity check, prevent out of bounds
-    if (right < n.lo)
-      return Integer.MIN_VALUE;
-    if (left > n.hi)
-      return Integer.MIN_VALUE;
+  private int query(int nodeIdx, int from, int to) {
+
+    int leftBound = segmentStarts[nodeIdx];
+    int rightBound = segmentEnds[nodeIdx];
 
     // If node's range is completely covered by the provided bounds, we don't need
     // to continue traversing because node's max represents the max of all numbers
     // within the range
-    if (n.lo >= left && n.hi <= right)
-      return n.max;
+    if (leftBound >= from && rightBound <= to)
+      return maxes[nodeIdx];
+
+    int leftChildIdx = getLeftChildIdx(nodeIdx);
+    int rightChildIdx = getRightChildIdx(nodeIdx);
 
     int max = Integer.MIN_VALUE;
 
     // If there's a partial overlap, we traverse downward
-    if (n.left != null && left <= n.left.hi)
-      max = Math.max(max, query(n.left, left, right));
+    if (isValidIdx(leftChildIdx) && leftBound <= segmentEnds[leftChildIdx])
+      max = Math.max(max, query(leftChildIdx, from, to));
 
-    if (n.right != null && right >= n.right.lo)
-      max = Math.max(max, query(n.right, left, right));
+    if (isValidIdx(rightChildIdx) && rightBound >= segmentStarts[rightChildIdx])
+      max = Math.max(max, query(rightChildIdx, from, to));
 
     return max;
   }
 
-  private void updateRange(Node n, int left, int right, int value) {
-    // Sanity check
-    if (right < n.lo)
-      return;
-    if (left > n.hi)
-      return;
+  private void updateRange(int idx, int left, int right, int value) {
+    int to = segmentEnds[idx];
+    int from = segmentStarts[idx];
+
+    int leftIdx = getLeftChildIdx(idx);
+    int rightIdx = getRightChildIdx(idx);
 
     // If node's range is completely covered by the provided bounds, we don't need
     // to continue traversing because node's max represents the max of all numbers
     // within the range. We can simply update the max value of the node.
-    if (n.lo >= left && n.hi <= right)
-      n.max = Math.max(n.max, value);
+    if (from >= left && to <= right)
+      maxes[idx] = Math.max(maxes[idx], value);
 
     // If there's a partial overlap, we traverse downward
-    if (n.left != null && left <= n.left.hi)
-      updateRange(n.left, left, right, value);
+    if (isValidIdx(leftIdx) && from <= segmentEnds[leftIdx])
+      updateRange(leftIdx, left, right, value);
 
-    if (n.right != null && right >= n.right.lo)
-      updateRange(n.right, left, right, value);
+    if (isValidIdx(rightIdx) && to >= segmentStarts[rightIdx])
+      updateRange(rightIdx, left, right, value);
+
   }
 
   @Override
@@ -137,59 +114,45 @@ public class MaxSegmentTree implements SegmentTree {
 
   @Override
   public void updateRange(int left, int right, int value) {
-    updateRange(root, left, right, value);
+    updateRange(0, left, right, value);
   }
 
   @Override
   public int query(int left, int right) {
-    return query(root, left, right);
+    return query(0, left, right);
   }
 
-  /**
-   * A private representation of a Node in the tree. Example:
-   * 
-   * Node node = new Node(max: 100, lo: 0, hi: 25) // The largest value between 0
-   * and
-   * 25
-   * (inclusively) is 100
-   * 
-   * node's left pointer will point to [0:n] and node's right pointer will point
-   * to [n + 1:25]'
-   */
-  private static class Node {
-    /**
-     * The max value in the range
-     */
-    int max;
+  private boolean isValidIdx(int idx) {
+    return idx >= 0 && idx < maxes.length;
+  }
 
-    /**
-     * The lower bound of the node's range
-     */
-    int lo;
-    /**
-     * The (inclusive) upper bound of the node's range
-     */
-    int hi;
+  private int getLeftChildIdx(int idx) {
+    return 2 * idx + 1;
+  }
 
-    /**
-     * A pointer to the smaller half of this node's range
-     */
-    Node left;
+  private int getRightChildIdx(int idx) {
+    return 2 * idx + 2;
+  }
 
-    /**
-     * A pointer to the larger half of this node's range
-     */
-    Node right;
+  private int findNextPowerOfTwo(int from) {
+    int count = 0;
 
-    public Node(int max, int lo, int hi) {
-      this.max = max;
-      this.lo = lo;
-      this.hi = hi;
+    while (from != 0) {
+      from >>>= 1;
+      count++;
     }
 
-    @Override
-    public String toString() {
-      return "[" + this.lo + ":" + this.hi + "] max = " + this.max;
-    }
+    return (int) Math.pow(2, count);
+  }
+
+  private Integer safeMax(Integer num1, Integer num2) {
+    if (num1 == null && num2 == null)
+      return null;
+    if (num1 == null)
+      return num2;
+    if (num2 == null)
+      return num1;
+
+    return Math.max(num1, num2);
   }
 }
