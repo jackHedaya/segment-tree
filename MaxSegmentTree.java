@@ -136,14 +136,22 @@ public class MaxSegmentTree implements SegmentTree {
    * Finds the smallest power of two that is greater than or equal to `from`
    */
   private int findNextPowerOfTwo(int from) {
-    int count = 0;
+    if (from <= 0)
+      return 1;
 
-    while (from != 0) {
-      from >>>= 1;
-      count++;
-    }
+    // If `from` is already a power of two, return it
+    if ((from & (from - 1)) == 0)
+      return from;
 
-    return (int) Math.pow(2, count);
+    // Shift to the left by 1 to flip the next power of 2
+    int num = from << 1;
+
+    // Using a variation of Brian Kernighan’s Bit Counting Algorithm to clear
+    // the rightmost flipped bit until right before it becomes 0
+    while ((num & (num - 1)) != 0)
+      num &= num - 1;
+
+    return num;
   }
 
   /**
