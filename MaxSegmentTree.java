@@ -99,9 +99,7 @@ public class MaxSegmentTree implements SegmentTree {
     int leftIdx = getLeftChildIdx(idx);
     int rightIdx = getRightChildIdx(idx);
 
-    // If node's range is completely covered by the provided bounds, we don't need
-    // to continue traversing because node's max represents the max of all numbers
-    // within the range. We can simply update the max value of the node.
+    // If node's range is completely covered by the provided bounds, update the max
     if (leftBound >= from && rightBound <= to)
       maxes[idx] = Math.max(maxes[idx], value);
 
