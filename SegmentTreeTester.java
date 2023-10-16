@@ -2,11 +2,6 @@
 import java.util.Arrays;
 import java.util.Random;
 
-@FunctionalInterface
-interface GetRandomFunction<T> {
-  public T apply();
-}
-
 public abstract class SegmentTreeTester<T> {
   T[] arr;
 
