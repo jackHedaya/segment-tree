@@ -1,4 +1,9 @@
+package com.jackhedaya.segment;
+
 import java.util.Arrays;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 interface ISegmentTree<T> {
   /**
@@ -28,6 +33,8 @@ public abstract class SegmentTree<T> implements ISegmentTree<T> {
   private T[] segmentVals;
   private int[] segmentStarts;
   private int[] segmentEnds;
+
+  // ReadWriteLock lock = new ReentrantReadWriteLock();
 
   /**
    * Constructs a segment tree to enable efficient range queries on a generic
@@ -74,6 +81,8 @@ public abstract class SegmentTree<T> implements ISegmentTree<T> {
   }
 
   private T query(int nodeIdx, int from, int to) {
+    // lock.writeLock().lock();
+
     int leftBound = segmentStarts[nodeIdx];
     int rightBound = segmentEnds[nodeIdx];
 
