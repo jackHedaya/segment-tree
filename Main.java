@@ -1,7 +1,6 @@
-
 public class Main {
 
-  final static boolean DEBUG = true;
+  final static boolean DEBUG = false;
 
   public static void main(String[] args) {
 
@@ -14,7 +13,7 @@ public class Main {
 
     MaxSegmentTreeTester tester = new MaxSegmentTreeTester(1_000_000);
 
-    tester.testMax(100);
+    tester.testSegmentTree(100);
     tester.testUpdate(25, 100);
   }
 }
