@@ -10,6 +10,8 @@ interface GetRandomFunction<T> {
 public abstract class SegmentTreeTester<T> {
   T[] arr;
 
+  private String name = null;
+
   public SegmentTreeTester(T[] arr) {
     this.arr = arr;
   }
@@ -41,11 +43,21 @@ public abstract class SegmentTreeTester<T> {
       int start = range.start;
       int end = range.end;
 
-      String message = "#query with range [" + start + ":" + end + "]";
+      String message = "";
+      String error = "";
+
+      if (name != null) {
+        message = name + ": ";
+        error = name + ": ";
+      }
+
+      message += "#query with range [" + start + ":" + end + "]";
 
       T got = st.query(start, end);
       T expected = naiveQuery(arr, start, end);
-      String error = message + " failed. Expected: " + expected + ". Got: " + got;
+
+      error += message + " failed. Expected: " + expected + ". Got: " + got;
+
       assertt(error, message, got.equals(expected));
     }
   }
@@ -77,6 +89,14 @@ public abstract class SegmentTreeTester<T> {
 
       testSegmentTree(arr, numSubIterations);
     }
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getName() {
+    return this.name;
   }
 
   private static void assertt(String msg, String title, boolean expression) {
