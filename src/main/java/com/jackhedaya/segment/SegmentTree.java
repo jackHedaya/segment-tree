@@ -105,16 +105,22 @@ public abstract class SegmentTree<T> implements ISegmentTree<T> {
   }
 
   private void updateRange(int idx, int from, int to, T value) {
+    if (!isValidIdx(idx))
+      return;
+
     int leftBound = segmentStarts[idx];
     int rightBound = segmentEnds[idx];
 
     int leftIdx = getLeftChildIdx(idx);
     int rightIdx = getRightChildIdx(idx);
 
-    // If node's range is completely covered by the provided bounds, update the
-    // comparison value
-    if (leftBound >= from && rightBound <= to)
-      segmentVals[idx] = merge(segmentVals[idx], value);
+    // If the node is a leaf node, we update the value if it's within the range
+    if (!isValidIdx(leftIdx) && !isValidIdx(rightIdx)) {
+      if (leftBound >= from && rightBound <= to)
+        segmentVals[idx] = value;
+
+      return;
+    }
 
     // If there's a partial overlap, we traverse downward
     if (isValidIdx(leftIdx) && leftBound <= segmentEnds[leftIdx])
@@ -122,6 +128,18 @@ public abstract class SegmentTree<T> implements ISegmentTree<T> {
 
     if (isValidIdx(rightIdx) && rightBound >= segmentStarts[rightIdx])
       updateRange(rightIdx, from, to, value);
+
+    // Update the current node's value based on its children
+    T leftChildVal = null;
+    T rightChildVal = null;
+
+    if (isValidIdx(leftIdx))
+      leftChildVal = segmentVals[leftIdx];
+
+    if (isValidIdx(rightIdx))
+      rightChildVal = segmentVals[rightIdx];
+
+    segmentVals[idx] = safeMerge(leftChildVal, rightChildVal);
   }
 
   /**

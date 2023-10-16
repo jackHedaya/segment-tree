@@ -16,7 +16,7 @@ public class SegmentTreeUpdateTest extends SegmentTreeTestBase {
 
     tree.updateRange(0, 3, 2);
 
-    int expected2 = 4;
+    int expected2 = 2;
     int got2 = tree.query(0, 3);
 
     assertEquals(expected2, got2);
@@ -33,7 +33,7 @@ public class SegmentTreeUpdateTest extends SegmentTreeTestBase {
 
     tree.updateRange(0, 3, 2);
 
-    int expected2 = 1;
+    int expected2 = 2;
     int got2 = tree.query(0, 3);
 
     assertEquals(expected2, got2);
@@ -50,7 +50,7 @@ public class SegmentTreeUpdateTest extends SegmentTreeTestBase {
 
     tree.updateRange(0, 3, 2);
 
-    int expected2 = 13;
+    int expected2 = 8;
     int got2 = tree.query(0, 3);
 
     assertEquals(expected2, got2);
