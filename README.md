@@ -1,4 +1,4 @@
-# Max Segment Tree
+# Segment Tree
 
 ## Description
 
@@ -17,3 +17,4 @@ This is a simple implementation of a max segment tree. It supports the following
 ## Future
 
 - Implement Lazy Propagation to improve the efficiency of range updates.
+- Add Thread-safety to Segment Trees.
